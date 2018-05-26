@@ -4,6 +4,9 @@ import com.daimler.model.Car;
 import com.daimler.service.CarService;
 import com.daimler.service.CarServiceImpl;
 import com.daimler.service.exception.CarNotFoundException;
+import groovy.lang.GroovyShell;
+import groovy.lang.Script;
+import groovy.servlet.GroovyServlet;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 import javax.script.*;
@@ -12,9 +15,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,29 +46,24 @@ public class CarController extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
         try (PrintWriter writer = res.getWriter()) {
+            GroovyShell groovyShell = new GroovyShell();
+            Script script = groovyShell.parse(new File("src/main/webapp/index.tpl"));
+            Map bindings = script.getBinding().getVariables();
 
-             ScriptEngineManager engineManager = new ScriptEngineManager();
-             ScriptEngine scriptEngine = engineManager.getEngineByName("nashorn");
-             Invocable inv = (Invocable) scriptEngine;
-             String fileName = "src/main/resources/js/jsfile.js";
-             String functionName = "getId";
+
 
             idParam = req.getParameter("id");
-            scriptEngine.eval("load('" + fileName + "');");
-            Car retValue = (Car) inv.invokeFunction(functionName, new CarController(idParam));
-            if (retValue == null){
-                String message = "Car not found!";
-                writer.println(message);
-
-            }else{
-                writer.println(retValue);
-            }
-            writer.close();
+             Car car = carService.lookup(idParam);
+             writer.println(car);
+            // Forward to GSP file to display message
+            RequestDispatcher dispatcher = req
+                    .getRequestDispatcher("/index.tpl");
+            dispatcher.forward(req, res);
         } catch (IOException ex) {
             Logger.getLogger(CarController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchMethodException e) {
+        } catch (CarNotFoundException e) {
             e.printStackTrace();
-        } catch (ScriptException e) {
+        } catch (ServletException e) {
             e.printStackTrace();
         }
     }

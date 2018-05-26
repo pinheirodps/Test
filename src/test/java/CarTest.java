@@ -4,26 +4,50 @@ import com.daimler.model.CarBuilder;
 import com.daimler.service.CarService;
 import com.daimler.service.CarServiceImpl;
 import com.daimler.service.exception.CarNotFoundException;
+import groovy.lang.GroovyShell;
+import groovy.lang.Script;
+import org.codehaus.groovy.control.CompilationFailedException;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Level;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 
 
 public class CarTest {
 
     private static CarService carService;
+
+    @Mock
+    HttpServletRequest request;
+
+    @Mock
+    HttpServletResponse response;
+
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+    }
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -93,24 +117,25 @@ public class CarTest {
 
     @Test
     public void testScript() {
-        ScriptEngineManager engineManager = new ScriptEngineManager();
-        ScriptEngine scriptEngine = engineManager.getEngineByName("nashorn");
+        GroovyShell groovyShell = new GroovyShell();
 
-        String fileName = "src/main/resources/js/jsfile.js";
-        String functionName = "getId";
         try {
+            Script script = groovyShell.parse(new File("src/main/webapp/index.tpl"));
+            Map bindings = script.getBinding().getVariables();
+            when(request.getParameter("id")).thenReturn("1");
 
-            scriptEngine.eval("load('" + fileName + "');");
-            Invocable inv = (Invocable) scriptEngine;
+            //setting atributes in script here
+            bindings.put("id",request);
 
-            Car retValue = (Car) inv.invokeFunction(functionName, new CarTest());
+            //run the script
+            script.run();
 
-            System.out.println(fileName + "@" + functionName + " returned " + retValue);
+            //getting object values after the script
+            Object carObject = bindings.get("car");
 
-        } catch (ScriptException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+        } catch (CompilationFailedException | IOException ex) {
+            //improve
+            ex.printStackTrace();
         }
     }
 

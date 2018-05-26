@@ -12,10 +12,14 @@
         <servlet-class>com.daimler.controller.CarController</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
+    <servlet>
+        <servlet-name>Groovy</servlet-name>
+        <servlet-class>groovy.servlet.GroovyServlet</servlet-class>
+    </servlet>
 
     <servlet-mapping>
         <servlet-name>carController</servlet-name>
-        <url-pattern>*.dtl</url-pattern>
+        <url-pattern>*.tpl</url-pattern>
     </servlet-mapping>
 
 
