@@ -12,15 +12,15 @@ public class CarSpecification implements CarRepository {
 
 
     @Override
-    public Optional<Car> findById(String id) {
+    public Car findById(String id) {
         if (id != null && !id.isEmpty()) {
             final int carId = Integer.valueOf(id);
             if (carId > 0 && carId <= findAll().size()) {
-                return Optional.ofNullable(findAll().get(carId - 1));
+                return (findAll().get(carId - 1));
             }
         }
 
-        return Optional.ofNullable(null);
+        return null;
     }
 
     @Override

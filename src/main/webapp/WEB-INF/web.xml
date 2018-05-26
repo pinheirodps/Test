@@ -4,6 +4,8 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
          metadata-complete="true" version="3.0">
     <display-name>DaimlerTL</display-name>
+    <welcome-file>index.dtl</welcome-file>
+
 
     <servlet>
         <servlet-name>carController</servlet-name>
@@ -13,7 +15,7 @@
 
     <servlet-mapping>
         <servlet-name>carController</servlet-name>
-        <url-pattern>/</url-pattern>
+        <url-pattern>*.dtl</url-pattern>
     </servlet-mapping>
 
 

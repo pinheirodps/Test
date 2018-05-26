@@ -3,11 +3,10 @@ package com.daimler.controller;
 import com.daimler.model.Car;
 import com.daimler.service.CarService;
 import com.daimler.service.CarServiceImpl;
+import com.daimler.service.exception.CarNotFoundException;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
+import javax.script.*;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -22,12 +21,17 @@ import java.util.logging.Logger;
 
 public class CarController extends HttpServlet {
 
-    private ScriptEngineManager factory;
-    private ScriptEngine engine;
-    private ScriptObjectMirror script;
+
     private CarService carService;
+    private String idParam = "";
 
     public CarController() {
+        this.carService = new CarServiceImpl();
+    }
+
+
+    public CarController(String idParam) {
+        this.idParam = idParam;
         this.carService = new CarServiceImpl();
     }
 
@@ -35,30 +39,46 @@ public class CarController extends HttpServlet {
 
 
     @Override
-    public void init() throws ServletException {
-        try {
-            factory = new ScriptEngineManager();
-            engine = factory.getEngineByName("nashorn");
-            script = (ScriptObjectMirror)engine.eval("function(writer) {writer.print('Hello, World!');}");
-        } catch (ScriptException ex) {
-            Logger.getLogger(CarController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
         try (PrintWriter writer = res.getWriter()) {
-            script.call(null, writer);
+
+             ScriptEngineManager engineManager = new ScriptEngineManager();
+             ScriptEngine scriptEngine = engineManager.getEngineByName("nashorn");
+             Invocable inv = (Invocable) scriptEngine;
+             String fileName = "src/main/resources/js/jsfile.js";
+             String functionName = "getId";
+
+            idParam = req.getParameter("id");
+            scriptEngine.eval("load('" + fileName + "');");
+            Car retValue = (Car) inv.invokeFunction(functionName, new CarController(idParam));
+            if (retValue == null){
+                String message = "Car not found!";
+                writer.println(message);
+
+            }else{
+                writer.println(retValue);
+            }
             writer.close();
         } catch (IOException ex) {
             Logger.getLogger(CarController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (ScriptException e) {
+            e.printStackTrace();
         }
     }
 
+    public String getId(){
+        return idParam;
+    }
 
-
-    public Optional<Car> lookup(String id){
-        return carService.lookup(id);
+    public Car lookup(String id) {
+        try {
+            return carService.lookup(id);
+        } catch (CarNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public List<Car> findAll(){
@@ -66,9 +86,11 @@ public class CarController extends HttpServlet {
     }
 
 
+    public String getIdParam() {
+        return idParam;
+    }
 
-
-
-
-
+    public void setIdParam(String idParam) {
+        this.idParam = idParam;
+    }
 }

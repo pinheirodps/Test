@@ -17,17 +17,13 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public Optional<Car> lookup(String id)  {
-       Optional<Car> car = repository.findById(id);
-        if (!car.isPresent()){
-            try {
-                throw  new CarNotFoundException("Car not found!");
-            } catch (CarNotFoundException e) {
-                System.out.println(e.getMessage());
-            }
+    public Car lookup(String id) throws CarNotFoundException {
+       Car car = repository.findById(id);
+        if (car!=null){
+            return car;
+        }else {
+            throw new CarNotFoundException("Car not found!");
         }
-        return car;
-
     }
 
     @Override

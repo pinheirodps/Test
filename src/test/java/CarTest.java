@@ -5,18 +5,28 @@ import com.daimler.service.CarService;
 import com.daimler.service.CarServiceImpl;
 import com.daimler.service.exception.CarNotFoundException;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 
 public class CarTest {
 
     private static CarService carService;
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
 
     @BeforeClass
@@ -42,24 +52,23 @@ public class CarTest {
 
 
     @Test
-    public void testFindCarById(){
+    public void testFindCarById() throws CarNotFoundException {
         Car testCar = buildCar();
-        Optional<Car> car = carService.lookup("1");
-        assertTrue(testCar.equals(car.get()));
+        Car car = carService.lookup("1");
+        assertTrue(testCar.equals(car));
         System.out.println(car);
     }
 
-    @Test(expected = CarNotFoundException.class)
-    public void testCarNotFound() throws CarNotFoundException {
-        Optional<Car> car = carService.lookup("10");
-        System.out.println(car);
-        assertFalse(carThrowException());
+    @Test
+    public void testCarNotFound() throws CarNotFoundException  {
+        //test type
+        thrown.expect(CarNotFoundException.class);
+        //test message
+        thrown.expectMessage(is("Car not found!"));
+        Car car = carService.lookup("10");
+
     }
 
-
-    private boolean carThrowException() throws CarNotFoundException {
-        throw new CarNotFoundException();
-    }
 
     private Car buildCar(){
         Car car = new CarBuilder("Smart", false, "Diesel", 1).build();
@@ -78,7 +87,32 @@ public class CarTest {
     }
 
 
+    public String getId(){
+        return "1";
+    }
 
+    @Test
+    public void testScript() {
+        ScriptEngineManager engineManager = new ScriptEngineManager();
+        ScriptEngine scriptEngine = engineManager.getEngineByName("nashorn");
+
+        String fileName = "src/main/resources/js/jsfile.js";
+        String functionName = "doIt";
+        try {
+
+            scriptEngine.eval("load('" + fileName + "');");
+            Invocable inv = (Invocable) scriptEngine;
+
+            Car retValue = (Car) inv.invokeFunction(functionName, new CarTest());
+
+            System.out.println(fileName + "@" + functionName + " returned " + retValue);
+
+        } catch (ScriptException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 

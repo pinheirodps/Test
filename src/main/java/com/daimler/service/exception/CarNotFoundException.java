@@ -6,7 +6,4 @@ public class CarNotFoundException extends Exception {
         super(message);
     }
 
-    public CarNotFoundException() {
-
-    }
 }
