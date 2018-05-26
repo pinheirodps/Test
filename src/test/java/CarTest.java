@@ -4,8 +4,11 @@ import com.daimler.model.CarBuilder;
 import com.daimler.service.CarService;
 import com.daimler.service.CarServiceImpl;
 import com.daimler.service.exception.CarNotFoundException;
+import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
+import groovy.util.GroovyScriptEngine;
+import groovy.util.ResourceException;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -36,6 +39,8 @@ import static org.mockito.Mockito.when;
 
 public class CarTest {
 
+    private static final String STATUS_OK ="OK" ;
+    private static final String CONSTID ="id"; ;
     private static CarService carService;
 
     @Mock
@@ -120,18 +125,20 @@ public class CarTest {
         GroovyShell groovyShell = new GroovyShell();
 
         try {
-            Script script = groovyShell.parse(new File("src/main/webapp/index.tpl"));
+            Script script = groovyShell.parse(new File("src/main/webapp/WEB-INF/index.groovy"));
             Map bindings = script.getBinding().getVariables();
             when(request.getParameter("id")).thenReturn("1");
 
             //setting atributes in script here
-            bindings.put("id",request);
+            bindings.put("car",request);
 
             //run the script
             script.run();
 
             //getting object values after the script
-            Object carObject = bindings.get("car");
+             Object carObject =  bindings.get("car");
+            System.out.println(carObject.toString());
+
 
         } catch (CompilationFailedException | IOException ex) {
             //improve
@@ -139,6 +146,26 @@ public class CarTest {
         }
     }
 
+    @Test
+    public void testScript2() throws InterruptedException, IOException, ResourceException, ScriptException, groovy.util.ScriptException {
+        Binding binding = new Binding();
+        binding.setVariable(CONSTID, "1");
+        GroovyScriptEngine engine = new GroovyScriptEngine("D:\\challenge\\Daimler\\src\\main\\webapp\\WEB-INF");
+
+        while (true) {
+            Object ret = engine.run("index.groovy", binding);
+            if(STATUS_OK.equals(ret.toString())){
+                if(binding.hasVariable("car")){
+                    Object details = binding.getVariable("car");
+                    System.out.println(details);
+                }
+            }else{
+
+                System.out.println("Something wrong in groovy");
+            }
+            Thread.sleep(3000);
+        }
+    }
 
 
 

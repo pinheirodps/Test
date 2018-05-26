@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <script type="server/groovy">
         import com.daimler.controller.CarController
