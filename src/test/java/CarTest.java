@@ -40,8 +40,8 @@ import static org.mockito.Mockito.when;
 
 public class CarTest {
 
-    private static final String STATUS_OK = "OK";
-    private static final String CONSTID = "id";
+   public  String scriptContent;
+
     ;
     private static CarService carService;
 
@@ -134,11 +134,10 @@ public class CarTest {
             bindings.put("res", request);
 
             //run the script
-            script.run();
+            Car carObject = (Car) script.run();
 
             //getting object values after the script
-            Car carObject = (Car) bindings.get("car");
-            System.out.println(carObject.toString());
+            System.out.println(carObject);
 
 
         } catch (CompilationFailedException | IOException ex) {
@@ -156,52 +155,61 @@ public class CarTest {
 
         GroovyScriptEngine engine = new GroovyScriptEngine("D:\\challenge\\Daimler\\src\\main\\webapp\\WEB-INF");
 
-        Car  car = (Car) engine.run("index.groovy", binding);
+        Car car = (Car) engine.run("index.groovy", binding);
         System.out.println(car.toString());
 
 
     }
 
+
     @Test
     public void readFile() throws IOException {
-            String fileName = "index.tpl";
-            ClassLoader classLoader = new CarTest().getClass().getClassLoader();
-            File file = new File(classLoader.getResource(fileName).getFile());
-            String content = new String(Files.readAllBytes(file.toPath()));
-            String scriptContent = content.substring(0, 215);
-            String expressionsContent = content.substring(215, 536);
+        String fileName = "index.tpl";
+        ClassLoader classLoader = new CarTest().getClass().getClassLoader();
+        File file = new File(classLoader.getResource(fileName).getFile());
+        String content = new String(Files.readAllBytes(file.toPath()));
+        scriptContent = content.substring(60, 227);
+        String expressionsContent = content.substring(215, 536);
 
-            List<String> list = new ArrayList<>(Arrays.asList(content));
+        List<String> list = new ArrayList<>(Arrays.asList(content));
 
-          System.out.println(scriptContent);
+        System.out.println(scriptContent);
         System.out.println("-------------------------------");
-          System.out.println(expressionsContent);
+        System.out.println(expressionsContent);
 
     }
 
     @Test
-    public void groovyScript() {
-        /*
-          <script type="server/groovy">
-             import com.daimler.model.Car
-             car = new Car()
-             car.setBrand('William')
-           </script>
-         */
+    public void groovyScript() throws IOException {
+
         final StringBuilder commandBuilder = new StringBuilder();
-        commandBuilder.append("import com.daimler.model.Car\n");
-        commandBuilder.append("car = new Car()\n");
-        commandBuilder.append("car.setBrand('William')");
-
+        readFile();
+        commandBuilder.append(scriptContent);
         GroovyShell shell = new GroovyShell();
-        shell.evaluate(commandBuilder.toString());
 
-        getValueByExpression(Arrays.asList("car.brand"), shell)
+        Script script = shell.parse(scriptContent);
+        //   Map bindings = script.getBinding().getVariables();
+
+        when(request.getParameter("id")).thenReturn("1");
+
+        //setting atributes in script here
+        Binding binding = new Binding();
+        binding.setVariable("res", request);
+
+        //run the script
+        script.setBinding(binding);
+        Object car = script.run();
+
+        shell.setProperty("car", car);
+        // shell.evaluate(commandBuilder.toString());
+
+
+        getValueByExpression(Arrays.asList("car.brand", "car.fuelType"), shell)
                 .forEach((key, value) -> System.out.println(String.format("%s: %s", key, value)));
     }
 
     private Map<String, Object> getValueByExpression(final List<String> expressions, final GroovyShell shell) {
-        return expressions.stream().collect(Collectors.toMap(expression-> expression, shell::evaluate));
+        return expressions.stream().collect(Collectors.toMap(expression -> expression, shell::evaluate));
     }
 
 }

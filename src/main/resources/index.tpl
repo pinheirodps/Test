@@ -2,9 +2,10 @@
 <html>
     <script type="server/groovy">
         import com.daimler.controller.CarController
-        def id = request.getParameter("id")
-        def car = CarController.lookup(id)
-    </script>
+        def cltr = new CarController()
+        def id = res.getParameter("id")
+        def car = cltr.lookup(id)
+</script>
     <head>
         <title>${car.brand}</title>
     </head>
