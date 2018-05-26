@@ -97,7 +97,7 @@ public class CarTest {
         ScriptEngine scriptEngine = engineManager.getEngineByName("nashorn");
 
         String fileName = "src/main/resources/js/jsfile.js";
-        String functionName = "doIt";
+        String functionName = "getId";
         try {
 
             scriptEngine.eval("load('" + fileName + "');");
