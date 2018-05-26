@@ -24,13 +24,14 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.function.Supplier;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
@@ -152,6 +153,7 @@ public class CarTest {
         when(request.getParameter("id")).thenReturn("1");
 
         binding.setVariable("res", request);
+
         GroovyScriptEngine engine = new GroovyScriptEngine("D:\\challenge\\Daimler\\src\\main\\webapp\\WEB-INF");
 
         Car  car = (Car) engine.run("index.groovy", binding);
@@ -160,5 +162,46 @@ public class CarTest {
 
     }
 
+    @Test
+    public void readFile() throws IOException {
+            String fileName = "index.tpl";
+            ClassLoader classLoader = new CarTest().getClass().getClassLoader();
+            File file = new File(classLoader.getResource(fileName).getFile());
+            String content = new String(Files.readAllBytes(file.toPath()));
+            String scriptContent = content.substring(0, 215);
+            String expressionsContent = content.substring(215, 536);
+
+            List<String> list = new ArrayList<>(Arrays.asList(content));
+
+          System.out.println(scriptContent);
+        System.out.println("-------------------------------");
+          System.out.println(expressionsContent);
+
+    }
+
+    @Test
+    public void groovyScript() {
+        /*
+          <script type="server/groovy">
+             import com.daimler.model.Car
+             car = new Car()
+             car.setBrand('William')
+           </script>
+         */
+        final StringBuilder commandBuilder = new StringBuilder();
+        commandBuilder.append("import com.daimler.model.Car\n");
+        commandBuilder.append("car = new Car()\n");
+        commandBuilder.append("car.setBrand('William')");
+
+        GroovyShell shell = new GroovyShell();
+        shell.evaluate(commandBuilder.toString());
+
+        getValueByExpression(Arrays.asList("car.brand"), shell)
+                .forEach((key, value) -> System.out.println(String.format("%s: %s", key, value)));
+    }
+
+    private Map<String, Object> getValueByExpression(final List<String> expressions, final GroovyShell shell) {
+        return expressions.stream().collect(Collectors.toMap(expression-> expression, shell::evaluate));
+    }
 
 }
