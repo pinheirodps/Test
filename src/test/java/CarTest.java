@@ -154,8 +154,8 @@ public class CarTest {
         binding.setVariable("res", request);
         GroovyScriptEngine engine = new GroovyScriptEngine("D:\\challenge\\Daimler\\src\\main\\webapp\\WEB-INF");
 
-        Object ret = engine.run("index.groovy", binding);
-        System.out.println(ret.toString());
+        Car  car = (Car) engine.run("index.groovy", binding);
+        System.out.println(car.toString());
 
 
     }
