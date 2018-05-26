@@ -39,8 +39,9 @@ import static org.mockito.Mockito.when;
 
 public class CarTest {
 
-    private static final String STATUS_OK ="OK" ;
-    private static final String CONSTID ="id"; ;
+    private static final String STATUS_OK = "OK";
+    private static final String CONSTID = "id";
+    ;
     private static CarService carService;
 
     @Mock
@@ -64,20 +65,18 @@ public class CarTest {
     }
 
     @Test
-    public void testBuildOneCar(){
+    public void testBuildOneCar() {
         Car car = buildCar();
         System.out.println(car);
     }
 
 
-
     @Test
-    public void testFindAllCars(){
+    public void testFindAllCars() {
         List<Car> cars = carService.findAll();
-        cars.forEach((car)-> System.out.println(car));
+        cars.forEach((car) -> System.out.println(car));
         assertTrue(cars.equals(getCars()));
     }
-
 
 
     @Test
@@ -89,7 +88,7 @@ public class CarTest {
     }
 
     @Test
-    public void testCarNotFound() throws CarNotFoundException  {
+    public void testCarNotFound() throws CarNotFoundException {
         //test type
         thrown.expect(CarNotFoundException.class);
         //test message
@@ -99,12 +98,12 @@ public class CarTest {
     }
 
 
-    private Car buildCar(){
+    private Car buildCar() {
         Car car = new CarBuilder("Smart", false, "Diesel", 1).build();
         return car;
     }
 
-    private List<Car> getCars(){
+    private List<Car> getCars() {
         final List<Car> cars = new ArrayList<Car>() {
             {
                 add(new CarBuilder().setBrand("Smart").setEcoFriendly(false).setFuelType("Diesel").setNumberOfModels(1).build());
@@ -116,7 +115,7 @@ public class CarTest {
     }
 
 
-    public String getId(){
+    public String getId() {
         return "1";
     }
 
@@ -126,17 +125,18 @@ public class CarTest {
 
         try {
             Script script = groovyShell.parse(new File("src/main/webapp/WEB-INF/index.groovy"));
+            Binding binding = new Binding();
             Map bindings = script.getBinding().getVariables();
             when(request.getParameter("id")).thenReturn("1");
 
             //setting atributes in script here
-            bindings.put("car",request);
+            bindings.put("res", request);
 
             //run the script
             script.run();
 
             //getting object values after the script
-             Object carObject =  bindings.get("car");
+            Car carObject = (Car) bindings.get("car");
             System.out.println(carObject.toString());
 
 
@@ -149,24 +149,16 @@ public class CarTest {
     @Test
     public void testScript2() throws InterruptedException, IOException, ResourceException, ScriptException, groovy.util.ScriptException {
         Binding binding = new Binding();
-        binding.setVariable(CONSTID, "1");
+        when(request.getParameter("id")).thenReturn("1");
+
+        binding.setVariable("res", request);
         GroovyScriptEngine engine = new GroovyScriptEngine("D:\\challenge\\Daimler\\src\\main\\webapp\\WEB-INF");
 
-        while (true) {
-            Object ret = engine.run("index.groovy", binding);
-            if(STATUS_OK.equals(ret.toString())){
-                if(binding.hasVariable("car")){
-                    Object details = binding.getVariable("car");
-                    System.out.println(details);
-                }
-            }else{
+        Object ret = engine.run("index.groovy", binding);
+        System.out.println(ret.toString());
 
-                System.out.println("Something wrong in groovy");
-            }
-            Thread.sleep(3000);
-        }
+
     }
-
 
 
 }
