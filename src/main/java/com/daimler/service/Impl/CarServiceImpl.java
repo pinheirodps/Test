@@ -1,7 +1,7 @@
 package com.daimler.service.Impl;
 
 import com.daimler.model.Car;
-import com.daimler.repository.Impl.CarRepository;
+import com.daimler.repository.impl.CarRepository;
 import com.daimler.service.CarService;
 import com.daimler.service.exception.CarNotFoundException;
 import com.daimler.service.generic.impl.GenericServiceImpl;

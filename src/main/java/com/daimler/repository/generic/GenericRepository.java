@@ -1,4 +1,4 @@
-package com.daimler.repository.genericRepository;
+package com.daimler.repository.generic;
 
 import java.util.List;
 

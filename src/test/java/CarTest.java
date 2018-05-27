@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 
 public class CarTest {
 
-   public  String scriptContent;
+    public String scriptContent;
 
     ;
     private static CarService carService;
@@ -97,13 +97,11 @@ public class CarTest {
     }
 
     private List<Car> getCars() {
-        final List<Car> cars = new ArrayList<Car>() {
-            {
-                add(new CarBuilder().setBrand("Smart").setEcoFriendly(false).setFuelType("Diesel").setNumberOfModels(1).build());
-                add(new CarBuilder().setBrand("Mercedes-Benz").setEcoFriendly(true).setFuelType("Hybrid").setNumberOfModels(3).build());
-                add(new CarBuilder().setBrand("Mercedes-AMG").setEcoFriendly(true).setFuelType("Electric").setNumberOfModels(0).build());
-            }
-        };
+        final List<Car> cars = new ArrayList<>();
+        cars.add(new CarBuilder().setBrand("Smart").setEcoFriendly(false).setFuelType("Diesel").setNumberOfModels(1).build());
+        cars.add(new CarBuilder().setBrand("Mercedes-Benz").setEcoFriendly(true).setFuelType("Hybrid").setNumberOfModels(3).build());
+        cars.add(new CarBuilder().setBrand("Mercedes-AMG").setEcoFriendly(true).setFuelType("Electric").setNumberOfModels(0).build());
+
         return cars;
     }
 
@@ -127,6 +125,7 @@ public class CarTest {
 
 
     }
+
     String expressionsContent;
 
     @Test
@@ -136,7 +135,7 @@ public class CarTest {
         File file = new File(classLoader.getResource(fileName).getFile());
         String content = new String(Files.readAllBytes(file.toPath()));
         scriptContent = content.substring(45, 204);
-         expressionsContent = content.substring(217, 542);
+        expressionsContent = content.substring(217, 542);
 
 
         System.out.println(scriptContent);
@@ -144,7 +143,8 @@ public class CarTest {
         System.out.println(expressionsContent);
 
     }
-//reading
+
+    //reading
     @Test
     public void groovyScript() throws IOException {
 
@@ -174,15 +174,15 @@ public class CarTest {
         Object fuelType = shell.evaluate("car.fuelType");
         Object ecoFriendly = shell.evaluate("car.ecoFriendly");
 
-        String visible = ecoFriendly.equals(Boolean.valueOf("false")) ? "none" :"block";
+        String visible = ecoFriendly.equals(Boolean.valueOf("false")) ? "none" : "block";
 
 
         final StringBuilder html = new StringBuilder();
         String name = "\"brand\"";
         html.append("<!DOCTYPE html>\n" +
-                "<html><head><title>"+brand+"</title><head>    " +
-                "<h1 title=\""+brand+"\">"+brand+"</h1>"+
-                " <h2 data-if=\""+ecoFriendly+"\" title=\""+fuelType+"\">Fuel Type:"+fuelType+"</h2>"+
+                "<html><head><title>" + brand + "</title><head>    " +
+                "<h1 title=\"" + brand + "\">" + brand + "</h1>" +
+                " <h2 data-if=\"" + ecoFriendly + "\" title=\"" + fuelType + "\">Fuel Type:" + fuelType + "</h2>" +
 
                 "</body>\n" +
                 "</html>");
@@ -195,7 +195,6 @@ public class CarTest {
     private Map<String, Object> getValueByExpression(final List<String> expressions, final GroovyShell shell) {
         return expressions.stream().collect(Collectors.toMap(expression -> expression, shell::evaluate));
     }
-
 
 
 }
