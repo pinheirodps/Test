@@ -1,21 +1,20 @@
-import com.daimler.model.Car;
-import com.daimler.model.CarBuilder;
 import groovy.lang.GroovyShell;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
+/*
+* This test is to find the expressions in template
+* */
 public class TestTemplate {
 
     private static final String EXPRESSION_REGEX = "[$]{1}[{]{1}([a-zA-Z0-9.]+)[}]{1}";
-    private String scriptContent;
-    private String expressionsContent;
+
 
     @Test
     public void groovyScript() throws IOException {
@@ -27,13 +26,9 @@ public class TestTemplate {
         commandBuilder.append("car = new Car()              \n");
         commandBuilder.append("car.setBrand('William')      \n");
         commandBuilder.append("car.setFuelType('Gasoline')  \n");
-        commandBuilder.append(" final List<Car> cars = new ArrayList<Car>() {}  \n");
-        //commandBuilder.append("car.setModels(cars)     \n");
 
         final GroovyShell shell = new GroovyShell();
         shell.evaluate(commandBuilder.toString());
-
-        readFile();
 
         final Set<String> expressions = this.getExpressionsFromHTML(returnTemplate());
         final Map<String, Object> valueByExpression = this.getValueByExpression(expressions, shell);
@@ -69,24 +64,5 @@ public class TestTemplate {
         return htmlBuilder.toString();
     }
 
-    @Test
-    public void readFile() throws IOException {
-        String fileName = "index.tpl";
-        ClassLoader classLoader = new CarTest().getClass().getClassLoader();
-        File file = new File(classLoader.getResource(fileName).getFile());
-        String content = new String(Files.readAllBytes(file.toPath()));
-        scriptContent = content.substring(45, 204);
-        expressionsContent = content.substring(217, 542);
 
-
-        System.out.println(scriptContent);
-        System.out.println("-------------------------------");
-        System.out.println(expressionsContent);
-
-    }
-
-    private Car buildCar() {
-        Car car = new CarBuilder().setBrand("Smart").setEcoFriendly(false).setFuelType("Diesel").setNumberOfModels(1).build();
-        return car;
-    }
 }

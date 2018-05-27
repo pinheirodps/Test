@@ -2,17 +2,17 @@ package com.daimler.repository.Impl;
 
 import com.daimler.model.Car;
 import com.daimler.model.CarBuilder;
-import com.daimler.repository.CarRepository;
+import com.daimler.repository.genericRepository.GenericRepository;
+import com.daimler.repository.genericRepository.impl.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-public class CarSpecification implements CarRepository {
+public class CarRepository extends Repository<Car> implements GenericRepository {
 
 
     @Override
-    public Car findById(String id) {
+    public Car lookup(String id) {
         if (id != null && !id.isEmpty()) {
             final int carId = Integer.valueOf(id);
             if (carId > 0 && carId <= findAll().size()) {

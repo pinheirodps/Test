@@ -1,14 +1,13 @@
 import com.daimler.model.Car;
 import com.daimler.model.CarBuilder;
 import com.daimler.service.CarService;
-import com.daimler.service.CarServiceImpl;
+import com.daimler.service.Impl.CarServiceImpl;
 import com.daimler.service.exception.CarNotFoundException;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import groovy.util.GroovyScriptEngine;
 import groovy.util.ResourceException;
-import org.codehaus.groovy.control.CompilationFailedException;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -19,7 +18,6 @@ import org.mockito.MockitoAnnotations;
 
 import javax.script.ScriptException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -44,8 +42,6 @@ public class CarTest {
     @Mock
     HttpServletRequest request;
 
-    @Mock
-    HttpServletResponse response;
 
     @Before
     public void setUp() throws Exception {
@@ -116,34 +112,9 @@ public class CarTest {
         return "1";
     }
 
-    @Test
-    public void testScript() {
-        GroovyShell groovyShell = new GroovyShell();
-
-        try {
-            Script script = groovyShell.parse(new File("src/main/webapp/WEB-INF/index.groovy"));
-            Binding binding = new Binding();
-            Map bindings = script.getBinding().getVariables();
-            when(request.getParameter("id")).thenReturn("1");
-
-            //setting atributes in script here
-            bindings.put("res", request);
-
-            //run the script
-            Car carObject = (Car) script.run();
-
-            //getting object values after the script
-            System.out.println(carObject);
-
-
-        } catch (CompilationFailedException | IOException ex) {
-            //improve
-            ex.printStackTrace();
-        }
-    }
 
     @Test
-    public void testScript2() throws InterruptedException, IOException, ResourceException, ScriptException, groovy.util.ScriptException {
+    public void testScript() throws InterruptedException, IOException, ResourceException, ScriptException, groovy.util.ScriptException {
         Binding binding = new Binding();
         when(request.getParameter("id")).thenReturn("1");
 

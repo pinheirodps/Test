@@ -2,7 +2,7 @@ package com.daimler.controller;
 
 import com.daimler.model.Car;
 import com.daimler.service.CarService;
-import com.daimler.service.CarServiceImpl;
+import com.daimler.service.Impl.CarServiceImpl;
 import com.daimler.service.exception.CarNotFoundException;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
@@ -46,14 +46,17 @@ public class CarController extends HttpServlet {
             binding.setVariable("res", req);
             //run the script
 
+            //setting binding
             script.setBinding(binding);
             Car car = (Car) script.run();
             if (car == null) {
                 writer.println("Car not found");
                 return;
             }
+            //setting car in the context of the groovy
             script.setProperty("car", car);
 
+             //filling the template with cars data
             final StringBuilder html = getStringTemplate(script);
 
             writer.println(html);
@@ -64,6 +67,7 @@ public class CarController extends HttpServlet {
     }
 
     private StringBuilder getStringTemplate(Script script) {
+        //getting the attributes of the car to fill the html
         Object brand = script.evaluate("car.brand");
         Object fuelType = script.evaluate("car.fuelType");
         Object ecoFriendly = script.evaluate("car.ecoFriendly");
@@ -80,6 +84,7 @@ public class CarController extends HttpServlet {
         return html;
     }
 
+    //read the tem+late in the resources
     public void readFile() throws IOException {
         String fileName = "index.tpl";
         ClassLoader classLoader = new CarController().getClass().getClassLoader();
@@ -94,16 +99,17 @@ public class CarController extends HttpServlet {
 
     }
 
-
+    //find car by id
     public Car lookup(String id) {
         try {
             return carService.lookup(id);
+            //throws the expection if the car not found
         } catch (CarNotFoundException e) {
             e.printStackTrace();
         }
         return null;
     }
-
+    //find all the cars
     public List<Car> findAll() {
         return carService.findAll();
     }
