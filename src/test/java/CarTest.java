@@ -1,4 +1,3 @@
-import com.daimler.controller.CarController;
 import com.daimler.model.Car;
 import com.daimler.model.CarBuilder;
 import com.daimler.service.CarService;
@@ -18,23 +17,20 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.function.Supplier;
-import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 
@@ -100,7 +96,7 @@ public class CarTest {
 
 
     private Car buildCar() {
-        Car car = new CarBuilder("Smart", false, "Diesel", 1).build();
+        Car car = new CarBuilder().setBrand("Smart").setEcoFriendly(false).setFuelType("Diesel").setNumberOfModels(1).build();
         return car;
     }
 
@@ -160,7 +156,7 @@ public class CarTest {
 
 
     }
-
+    String expressionsContent;
 
     @Test
     public void readFile() throws IOException {
@@ -168,10 +164,9 @@ public class CarTest {
         ClassLoader classLoader = new CarTest().getClass().getClassLoader();
         File file = new File(classLoader.getResource(fileName).getFile());
         String content = new String(Files.readAllBytes(file.toPath()));
-        scriptContent = content.substring(60, 227);
-        String expressionsContent = content.substring(215, 536);
+        scriptContent = content.substring(45, 204);
+         expressionsContent = content.substring(217, 542);
 
-        List<String> list = new ArrayList<>(Arrays.asList(content));
 
         System.out.println(scriptContent);
         System.out.println("-------------------------------");
@@ -187,6 +182,7 @@ public class CarTest {
         commandBuilder.append(scriptContent);
         GroovyShell shell = new GroovyShell();
 
+
         Script script = shell.parse(scriptContent);
         //   Map bindings = script.getBinding().getVariables();
 
@@ -198,10 +194,27 @@ public class CarTest {
 
         //run the script
         script.setBinding(binding);
-        Object car = script.run();
+        Car car = (Car) script.run();
 
         shell.setProperty("car", car);
-        // shell.evaluate(commandBuilder.toString());
+
+
+        Object brand = shell.evaluate("car.brand");
+        Object fuelType = shell.evaluate("car.fuelType");
+        Object ecoFriendly = shell.evaluate("car.ecoFriendly");
+
+        String visible = ecoFriendly.equals(Boolean.valueOf("false")) ? "none" :"block";
+
+
+        final StringBuilder html = new StringBuilder();
+        String name = "\"brand\"";
+        html.append("<!DOCTYPE html>\n" +
+                "<html><head><title>"+brand+"</title><head>    " +
+                "<h1 title=\""+brand+"\">"+brand+"</h1>"+
+                " <h2 data-if=\""+ecoFriendly+"\" title=\""+fuelType+"\">Fuel Type:"+fuelType+"</h2>"+
+
+                "</body>\n" +
+                "</html>");
 
 
         getValueByExpression(Arrays.asList("car.brand", "car.fuelType"), shell)
@@ -211,5 +224,7 @@ public class CarTest {
     private Map<String, Object> getValueByExpression(final List<String> expressions, final GroovyShell shell) {
         return expressions.stream().collect(Collectors.toMap(expression -> expression, shell::evaluate));
     }
+
+
 
 }
