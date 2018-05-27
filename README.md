@@ -9,3 +9,11 @@ Repository - Responsible for the data layer
 Builder - to create and configure objects (it was reused for the given code)
 
 I used an implementation based on interfaces respecting object-oriented and generics.
+
+Frameworks used:
+JavaEE Servlet, Groovy, Junit, mockito
+
+How did I implement this challenge?
+0 - Servlet receives the request
+1 - read template groovy
+2 - fill the values on html

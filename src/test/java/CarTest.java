@@ -116,14 +116,14 @@ public class CarTest {
     @Test
     public void testScript() throws InterruptedException, IOException, ResourceException, ScriptException, groovy.util.ScriptException {
         Binding binding = new Binding();
-        when(request.getParameter("id")).thenReturn("1");
+        when(request.getParameter("id")).thenReturn("2");
 
         binding.setVariable("res", request);
 
         GroovyScriptEngine engine = new GroovyScriptEngine("D:\\challenge\\Daimler\\src\\main\\webapp\\WEB-INF");
 
-        Car car = (Car) engine.run("index.groovy", binding);
-        System.out.println(car.toString());
+        String car = (String) engine.run("index.groovy", binding);
+        System.out.println(car);
 
 
     }
@@ -144,7 +144,7 @@ public class CarTest {
         System.out.println(expressionsContent);
 
     }
-
+//reading
     @Test
     public void groovyScript() throws IOException {
 
